@@ -2,6 +2,7 @@ package Scalar::Util::Instance;
 
 use 5.008_001;
 use strict;
+use warnings FATAL => 'all';
 
 our $VERSION = '0.001';
 
@@ -9,9 +10,27 @@ use XSLoader;
 XSLoader::load(__PACKAGE__, $VERSION);
 
 sub import {
-    my $class = shift;
+    my $class  = shift;
 
-    
+    $class->_install_into(scalar(caller), @_);
+    return;
+}
+
+sub _install_into{
+    my($class, $into, @args) = @_;
+
+    foreach my $config(@args){
+        my $as = $config->{as};
+        if(!defined $as){
+            require Carp;
+            Carp::croak("You must define an predicate name by 'as'");
+        }
+        if($as !~ /::/){
+            $as = $into . '::' . $as;
+        }
+        $class->generate_for($config->{for}, $as);
+    }
+    return;
 }
 
 1;
@@ -28,9 +47,17 @@ This document describes Scalar::Util::Instance version 0.001.
 =head1 SYNOPSIS
 
     use Scalar::Util::Instance
-        { -for => 'Foo', -as => 'is_a_Foo' },
-        { -for => 'Bar', -as => 'is_a_Bar' },
+        { for => 'Foo', as => 'is_a_Foo' },
+        { for => 'Bar', as => 'is_a_Bar' },
     ;
+
+    # ...
+    if(is_a_Foo($thing)){
+        # ...
+    }
+    elsif(is_a_Bar($thing)){
+        # ...
+    }
 
 =head1 DESCRIPTION
 
