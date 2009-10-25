@@ -52,10 +52,10 @@ This document describes Scalar::Util::Instance version 0.001.
     ;
 
     # ...
-    if(is_a_Foo($thing)){
+    if(is_a_Foo($_)){
         # ...
     }
-    elsif(is_a_Bar($thing)){
+    elsif(is_a_Bar($_)){
         # ...
     }
 

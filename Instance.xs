@@ -183,7 +183,7 @@ PPCODE:
     if(!SvOK(klass)){
         croak("You must define a class name for generate_isa_checker");
     }
-    klass_pv    = SvPV_const(klass, klass_len);
+    klass_pv = canonicalize_package_name( SvPV_const(klass, klass_len) );
 
     if(strNE(klass_pv, "UNIVERSAL")){
         xsub = newXS(predicate_name, XS_isa_checker, __FILE__);
@@ -194,7 +194,7 @@ PPCODE:
             (SV*)stash,
             PERL_MAGIC_ext,
             &scalar_util_instance_vtbl,
-            canonicalize_package_name(klass_pv), klass_len);
+            klass_pv, klass_len);
     }
     else{
         xsub = newXS(predicate_name, XS_isa_checker_for_universal, __FILE__);
