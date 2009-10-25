@@ -2,7 +2,7 @@ package Scalar::Util::Instance;
 
 use 5.008_001;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 
 our $VERSION = '0.001';
 
@@ -38,7 +38,7 @@ __END__
 
 =head1 NAME
 
-Scalar::Util::Instance - Generates is-a checking predicates
+Scalar::Util::Instance - Generates and installs is-a predicates
 
 =head1 VERSION
 
@@ -47,8 +47,8 @@ This document describes Scalar::Util::Instance version 0.001.
 =head1 SYNOPSIS
 
     use Scalar::Util::Instance
-        { for => 'Foo', as => 'is_a_Foo' },
-        { for => 'Bar', as => 'is_a_Bar' },
+        { for => 'Foo', as => 'is_a_Foo' }, # eq. blessed($_) && $_->isa('Foo')
+        { for => 'Bar', as => 'is_a_Bar' }, # eq. blessed($_) && $_->isa('Bar')
     ;
 
     # ...
@@ -61,11 +61,12 @@ This document describes Scalar::Util::Instance version 0.001.
 
 =head1 DESCRIPTION
 
-Scalar::Util::Instance provides
+Scalar::Util::Instance provides a way to generate is-a predictes to look up
+an is-a hierarchy for specific classes.
 
 =head1 INTERFACE
 
-=head2 Functions
+=head2 Utility functions
 
 =head3 C<< Scalar::Util::Instance->generate_for(ClassName, ?PredicateName) -> CODE >>
 
