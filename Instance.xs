@@ -22,6 +22,7 @@ static MGVTBL scalar_util_instance_vtbl;
 static const char*
 canonicalize_package_name(const char* name){
     assert(name);
+
     /* "::Foo" -> "Foo" */
     if(name[0] == ':' && name[1] == ':'){
         name += 2;
@@ -38,8 +39,6 @@ canonicalize_package_name(const char* name){
 static int
 check_isa(pTHX_ MAGIC* const mg, SV* const instance){
     dMY_CXT;
-    const char* const klass_pv  = mg->mg_ptr;
-    STRLEN const      klass_len = mg->mg_len;
 
     HV* const instance_stash = SvSTASH(SvRV(instance));
     GV* const instance_isa   = gv_fetchmeth_autoload(instance_stash, "isa", sizeof("isa")-1, 0);
@@ -52,9 +51,10 @@ check_isa(pTHX_ MAGIC* const mg, SV* const instance){
             return TRUE;
         }
         else{ /* look up @ISA hierarchy */
-            AV*  const linearized_isa = mro_get_linear_isa(instance_stash);
-            SV**       svp            = AvARRAY(linearized_isa);
-            SV** const end            = svp + AvFILLp(linearized_isa) + 1; /* start + last index + 1 */
+            const char* const klass_pv = mg->mg_ptr;
+            AV*  const linearized_isa  = mro_get_linear_isa(instance_stash);
+            SV**       svp             = AvARRAY(linearized_isa);
+            SV** const end             = svp + AvFILLp(linearized_isa) + 1;
 
             while(svp != end){
                 assert(SvPVX(*svp));
@@ -68,6 +68,8 @@ check_isa(pTHX_ MAGIC* const mg, SV* const instance){
     }
     /* the instance has its own isa method */
     else {
+        const char* const klass_pv  = mg->mg_ptr;
+        STRLEN const      klass_len = mg->mg_len;
         int retval;
         dSP;
 
@@ -102,23 +104,21 @@ XS(XS_isa_checker){
     dXSARGS;
     SV* sv;
 
+    assert(XSANY.any_ptr != NULL);
+
     if(items != 1){
         if(items < 1){
-            croak("Not enough arguments for is-a checker");
+            croak("Not enough arguments for is-a predicate");
         }
         else{
-            croak("Too many arguments for is-a checker");
+            croak("Too many arguments for is-a predicate");
         }
     }
 
     sv = ST(0);
-    if( SvROK(sv) && SvOBJECT(SvRV(sv)) ){
-        assert(XSANY.any_ptr != NULL);
-        ST(0) = boolSV( check_isa(aTHX_ (MAGIC*)XSANY.any_ptr, sv) );
-    }
-    else {
-        ST(0) = &PL_sv_no;
-    }
+    SvGETMAGIC(sv);
+
+    ST(0) = boolSV( SvROK(sv) && SvOBJECT(SvRV(sv)) && check_isa(aTHX_ (MAGIC*)XSANY.any_ptr, sv) );
     XSRETURN(1);
 }
 
@@ -131,14 +131,16 @@ XS(XS_isa_checker_for_universal){
 
     if(items != 1){
         if(items < 1){
-            croak("Not enough arguments for is-a checker");
+            croak("Not enough arguments for is-a predicate");
         }
         else{
-            croak("Too many arguments for is-a checker");
+            croak("Too many arguments for is-a predicate");
         }
     }
 
     sv = ST(0);
+    SvGETMAGIC(sv);
+
     ST(0) = boolSV( SvROK(sv) && SvOBJECT(SvRV(sv)) );
     XSRETURN(1);
 }
