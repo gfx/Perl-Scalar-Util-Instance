@@ -44,7 +44,7 @@ BEGIN{
     }
 }
 
-foreach my $x (Foo->new, Foo::X::X::X->new, Unrelated->new, undef, {}){
+foreach my $x (Foo->new, Foo::X::X::X->new, Unrelated->new, undef){
     print 'For ', defined($x) ? $x : 'undef', "\n";
 
     my $i = 0;
