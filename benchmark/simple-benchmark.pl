@@ -8,9 +8,7 @@ use lib $Bin;
 use Common;
 
 use Scalar::Util qw(blessed);
-use Scalar::Util::Instance;
-
-*is_a_Foo = Scalar::Util::Instance::generate_isa_checker_for('Foo');
+use Scalar::Util::Instance { for => 'Foo', as => 'is_a_Foo' };
 
 signature
     'Scalar::Util' => \&blessed,

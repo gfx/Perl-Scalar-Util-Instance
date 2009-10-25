@@ -10,9 +10,7 @@ use Common;
 use Data::Util qw(:all);
 use Params::Util qw(_INSTANCE); # 0.35 provides a XS implementation
 use Scalar::Util qw(blessed);
-use Scalar::Util::Instance;
-
-*is_a_Foo = Scalar::Util::Instance::generate_isa_checker_for('Foo');
+use Scalar::Util::Instance { for => 'Foo', as => 'is_a_Foo' };
 
 signature
     'Data::Util'   => \&is_instance,
