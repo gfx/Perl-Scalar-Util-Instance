@@ -8,6 +8,12 @@ our $VERSION = '0.001';
 use XSLoader;
 XSLoader::load(__PACKAGE__, $VERSION);
 
+sub import {
+    my $class = shift;
+
+    
+}
+
 1;
 __END__
 
@@ -21,7 +27,10 @@ This document describes Scalar::Util::Instance version 0.001.
 
 =head1 SYNOPSIS
 
-	use Scalar::Util::Instance;
+    use Scalar::Util::Instance
+        { -for => 'Foo', -as => 'is_a_Foo' },
+        { -for => 'Bar', -as => 'is_a_Bar' },
+    ;
 
 =head1 DESCRIPTION
 
@@ -31,7 +40,7 @@ Scalar::Util::Instance provides
 
 =head2 Functions
 
-=head3 C<< generate_isa_checker_for(ClassName) -> CODE >>
+=head3 C<< Scalar::Util::Instance->generate_for(ClassName, ?PredicateName) -> CODE >>
 
 =head1 DEPENDENCIES
 

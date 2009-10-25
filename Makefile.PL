@@ -14,7 +14,7 @@ test_requires 'Test::More' => 0.80;
 tests 't/*.t';
 author_tests 'xt';
 
-auto_set_repository() if -d '.git';
+#auto_set_repository() if -d '.git';
 
 clean_files qw(
 	Scalar-Util-Instance-* *.stackdump

@@ -11,13 +11,13 @@ plan tests => 26 * 2;
 
 use Scalar::Util::Instance;
 
-*is_a_foo       = Scalar::Util::Instance::generate_isa_checker_for('Foo');
-*is_a_bar       = Scalar::Util::Instance::generate_isa_checker_for('Bar');
-*is_a_baz       = Scalar::Util::Instance::generate_isa_checker_for('Baz');
-*is_a_hash      = Scalar::Util::Instance::generate_isa_checker_for('HASH');
-*is_a_broken    = Scalar::Util::Instance::generate_isa_checker_for('Broken');
-*is_a_universal = Scalar::Util::Instance::generate_isa_checker_for('UNIVERSAL');
-*is_an_al       = Scalar::Util::Instance::generate_isa_checker_for('AL');
+*is_a_foo       = Scalar::Util::Instance->generate_for('Foo');
+*is_a_bar       = Scalar::Util::Instance->generate_for('Bar');
+*is_a_baz       = Scalar::Util::Instance->generate_for('Baz');
+*is_a_hash      = Scalar::Util::Instance->generate_for('HASH');
+*is_a_broken    = Scalar::Util::Instance->generate_for('Broken');
+*is_a_universal = Scalar::Util::Instance->generate_for('UNIVERSAL');
+*is_an_al       = Scalar::Util::Instance->generate_for('AL');
 
 
 BEGIN{

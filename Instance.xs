@@ -169,9 +169,9 @@ CODE:
 
 #endif /* !USE_ITHREADS */
 
-SV*
-generate_isa_checker_for(SV* klass)
-CODE:
+void
+generate_for(self, SV* klass, const char* predicate_name = NULL)
+PPCODE:
 {
     STRLEN klass_len;
     const char* klass_pv;
@@ -184,7 +184,7 @@ CODE:
     klass_pv    = SvPV_const(klass, klass_len);
 
     if(strNE(klass_pv, "UNIVERSAL")){
-        xsub = newXS(NULL, XS_isa_checker, __FILE__);
+        xsub = newXS(predicate_name, XS_isa_checker, __FILE__);
 
         stash = gv_stashpvn(klass_pv, klass_len, GV_ADD);
 
@@ -195,11 +195,11 @@ CODE:
             canonicalize_package_name(klass_pv), klass_len);
     }
     else{
-        xsub = newXS(NULL, XS_isa_checker_for_universal, __FILE__);
+        xsub = newXS(predicate_name, XS_isa_checker_for_universal, __FILE__);
     }
 
-    RETVAL = newRV_noinc((SV*)xsub);
+    if(predicate_name == NULL){ /* anonymous predicate */
+        XPUSHs( newRV_noinc((SV*)xsub) );
+    }
 }
-OUTPUT:
-    RETVAL
 
