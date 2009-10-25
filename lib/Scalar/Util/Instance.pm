@@ -12,14 +12,8 @@ XSLoader::load(__PACKAGE__, $VERSION);
 sub import {
     my $class  = shift;
 
-    $class->_install_into(scalar(caller), @_);
-    return;
-}
-
-sub _install_into{
-    my($class, $into, @args) = @_;
-
-    foreach my $config(@args){
+    my $into = caller;
+    foreach my $config(@_){
         my $as = $config->{as};
         if(!defined $as){
             require Carp;
