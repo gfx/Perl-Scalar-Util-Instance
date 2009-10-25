@@ -39,7 +39,6 @@ canonicalize_package_name(const char* name){
 static int
 check_isa(pTHX_ MAGIC* const mg, SV* const instance){
     dMY_CXT;
-
     HV* const instance_stash = SvSTASH(SvRV(instance));
     GV* const instance_isa   = gv_fetchmeth_autoload(instance_stash, "isa", sizeof("isa")-1, 0);
 
@@ -145,6 +144,11 @@ XS(XS_isa_checker_for_universal){
     XSRETURN(1);
 }
 
+static void
+setup_my_cxt(pTHX_ pMY_CXT){
+    MY_CXT.universal_isa = CvGV(get_cv("UNIVERSAL::isa", GV_ADD));
+    SvREFCNT_inc_simple_void_NN(MY_CXT.universal_isa);
+}
 
 MODULE = Scalar::Util::Instance    PACKAGE = Scalar::Util::Instance
 
@@ -153,8 +157,7 @@ PROTOTYPES: DISABLE
 BOOT:
 {
     MY_CXT_INIT;
-    MY_CXT.universal_isa = CvGV(get_cv("UNIVERSAL::isa", GV_ADD));
-    SvREFCNT_inc_simple_void_NN(MY_CXT.universal_isa);
+    setup_my_cxt(aTHX_ aMY_CXT);
 }
 
 #ifdef USE_ITHREADS
@@ -164,8 +167,7 @@ CLONE(...)
 CODE:
 {
     MY_CXT_CLONE;
-    MY_CXT.universal_isa = CvGV(get_cv("UNIVERSAL::isa", GV_ADD));
-    SvREFCNT_inc_simple_void_NN(MY_CXT.universal_isa);
+    setup_my_cxt(aTHX_ aMY_CXT);
     PERL_UNUSED_VAR(items);
 }
 
@@ -190,11 +192,14 @@ PPCODE:
 
         stash = gv_stashpvn(klass_pv, klass_len, GV_ADD);
 
-        CvXSUBANY(xsub).any_ptr = sv_magicext((SV*)xsub,
-            (SV*)stash,
+        CvXSUBANY(xsub).any_ptr = sv_magicext(
+            (SV*)xsub,
+            (SV*)stash, /* mg_obj */
             PERL_MAGIC_ext,
             &scalar_util_instance_vtbl,
-            klass_pv, klass_len);
+            klass_pv,   /* mg_ptr */
+            klass_len   /* mg_len */
+        );
     }
     else{
         xsub = newXS(predicate_name, XS_isa_checker_for_universal, __FILE__);
