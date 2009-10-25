@@ -41,8 +41,8 @@ This document describes Scalar::Util::Instance version 0.001.
 =head1 SYNOPSIS
 
     use Scalar::Util::Instance
-        { for => 'Foo', as => 'is_a_Foo' }, # eq. blessed($_) && $_->isa('Foo')
-        { for => 'Bar', as => 'is_a_Bar' }, # eq. blessed($_) && $_->isa('Bar')
+        { for => 'Foo', as => 'is_a_Foo' },
+        { for => 'Bar', as => 'is_a_Bar' },
     ;
 
     # ...
@@ -55,14 +55,27 @@ This document describes Scalar::Util::Instance version 0.001.
 
 =head1 DESCRIPTION
 
-Scalar::Util::Instance provides a way to generate is-a predictes to look up
-an is-a hierarchy for specific classes.
+Scalar::Util::Instance provides is-a predictes to look up
+an is-a hierarchy for specific classes. This is an alternative to
+C<< blessed($obj) && $obj->isa(...) >>, but is significantly faster than it.
 
 =head1 INTERFACE
 
 =head2 Utility functions
 
-=head3 C<< Scalar::Util::Instance->generate_for(ClassName, ?PredicateName) -> CODE >>
+=head3 C<< Scalar::Util::Instance->generate_for(ClassName, ?PredicateName) >>
+
+Generates an is-a predicate.
+
+An is-a predicate for I<ClassName> is a function which is the same as the following:
+
+    sub is_a_some_class {
+        my($obj) = @_;
+        return Scalar::Util::blessed($obj) && $obj->isa($ClassName);
+    }
+
+If I<PredicateName> is specified, the method will install the generated function
+as that name. Otherwise returns an anonymous CODE reference.
 
 =head1 DEPENDENCIES
 
@@ -75,6 +88,10 @@ No bugs have been reported.
 Please report any bugs or feature requests to the author.
 
 =head1 SEE ALSO
+
+L<Scalar::Util>
+
+L<Data::Util>
 
 =head1 AUTHOR
 
