@@ -47,21 +47,14 @@ check_isa(pTHX_ MAGIC* const mg, SV* const instance){
     /* the instance has no own isa method */
     if(instance_isa == NULL || GvCV(instance_isa) == GvCV(MY_CXT.universal_isa)){
         HV* const klass_stash = (HV*)mg->mg_obj;
-        const char* instance_klass_pv;
 
         if(klass_stash == instance_stash){
             return TRUE;
         }
-
-        instance_klass_pv = canonicalize_package_name(HvNAME_get(instance_stash));
-
-        if(strEQ(instance_klass_pv, klass_pv)){
-            return TRUE;
-        }
         else{ /* look up @ISA hierarchy */
             AV*  const linearized_isa = mro_get_linear_isa(instance_stash);
-            SV**       svp            = AvARRAY(linearized_isa) + 1;   /* skip this class */
-            SV** const end            = svp + AvFILLp(linearized_isa); /* start + 1 + last index */
+            SV**       svp            = AvARRAY(linearized_isa);
+            SV** const end            = svp + AvFILLp(linearized_isa) + 1; /* start + last index + 1 */
 
             while(svp != end){
                 assert(SvPVX(*svp));
