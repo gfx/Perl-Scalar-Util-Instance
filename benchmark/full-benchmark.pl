@@ -29,24 +29,19 @@ BEGIN{
     
     package Foo;
     our @ISA = qw(Base);
-    package Foo::X;
+
+    package Bar;
     our @ISA = qw(Foo);
-    package Foo::X::X;
-    our @ISA = qw(Foo::X);
-    package Foo::X::X::X;
-    our @ISA = qw(Foo::X::X);
+    package Baz;
+    our @ISA = qw(Foo);
+    package Diamond;
+    our @ISA = qw(Bar Baz);
 
-    package Unrelated;
+    package NonFoo;
     our @ISA = qw(Base);
-
-    package SpecificIsa;
-    our @ISA = qw(Base);
-    sub isa{
-        $_[1] eq 'Foo';
-    }
 }
 
-foreach my $x (Foo->new, Foo::X::X::X->new, Unrelated->new, undef, {}){
+foreach my $x (Foo->new, Diamond->new, NonFoo->new, undef, {}){
     print 'For ', neat($x), "\n";
 
     my $i = 0;
