@@ -1,0 +1,85 @@
+#!perl -w
+
+use strict;
+use Benchmark qw(:all);
+
+use FindBin qw($Bin);
+use lib $Bin;
+use Common;
+
+use Data::Util qw(:all);
+use Params::Util qw(_INSTANCE); # 0.35 provides a XS implementation
+use Scalar::Util qw(blessed);
+use Scalar::Util::Instance;
+
+*is_a_Foo = Scalar::Util::Instance::generate_isa_checker_for('Foo');
+
+signature
+    'Data::Util'   => \&is_instance,
+    'Params::Util' => \&_INSTANCE,
+    'Scalar::Util' => \&blessed,
+    'Scalar::Util::Instance' => \&is_a_Foo,
+;
+
+sub noop{ }
+
+BEGIN{
+    package Base;
+    sub new{
+        bless {} => shift;
+    }
+    
+    package Foo;
+    our @ISA = qw(Base);
+    package Foo::X;
+    our @ISA = qw(Foo);
+    package Foo::X::X;
+    our @ISA = qw(Foo::X);
+    package Foo::X::X::X;
+    our @ISA = qw(Foo::X::X);
+
+    package Unrelated;
+    our @ISA = qw(Base);
+
+    package SpecificIsa;
+    our @ISA = qw(Base);
+    sub isa{
+        $_[1] eq 'Foo';
+    }
+}
+
+foreach my $x (Foo->new, Foo::X::X::X->new, Unrelated->new, undef, {}){
+    print 'For ', neat($x), "\n";
+
+    my $i = 0;
+
+    cmpthese -1 => {
+        'blessed' => sub{
+            for(1 .. 10){
+                1 if blessed($x) && $x->isa('Foo');
+            }
+        },
+        '_INSTANCE' => sub{
+            for(1 .. 10){
+                1 if _INSTANCE($x, 'Foo');
+            }
+        },
+        'is_instance' => sub{
+            for(1 .. 10){
+                1 if is_instance($x, 'Foo');
+            }
+        },
+        'is_a_Foo' => sub{
+            for(1 .. 10){
+                1 if is_a_Foo($x);
+            }
+        },
+        'noop' => sub{
+            for(1 .. 10){
+                1 if noop($x);
+            }
+        },
+    };
+
+    print "\n";
+}
