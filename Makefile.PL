@@ -15,7 +15,7 @@ test_requires 'Test::Exception', => 0.27;
 tests 't/*.t';
 author_tests 'xt';
 
-#auto_set_repository() if -d '.git';
+auto_set_repository() if -d '.git';
 
 clean_files qw(
 	Scalar-Util-Instance-* *.stackdump
