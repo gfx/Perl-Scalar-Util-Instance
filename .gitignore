@@ -15,3 +15,5 @@ MANIFEST
 ppport.h
 Scalar-Util-Instance-*
 Instance.c
+*.g*
+cover_db/
