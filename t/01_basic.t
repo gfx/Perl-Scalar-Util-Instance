@@ -1,9 +1,9 @@
 #!perl -w
 use strict;
-use Test::More tests => 26;
+use Test::More tests => 28;
 use Test::Exception;
 
-use Scalar::Util::Instance;
+use Scalar::Util::Instance ();
 
 Scalar::Util::Instance->generate_for('Foo',       'is_a_foo');
 Scalar::Util::Instance->generate_for('Bar',       'is_a_bar');
@@ -99,5 +99,14 @@ throws_ok{
 
 throws_ok{
     is_a_foo(1, 2);
+} qr/Too many arguments/;
+
+
+throws_ok{
+    is_a_universal();
+} qr/Not enough arguments/;
+
+throws_ok{
+    is_a_universal(1, 2);
 } qr/Too many arguments/;
 

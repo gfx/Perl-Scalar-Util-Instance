@@ -4,8 +4,6 @@ use strict;
 use Test::More tests => 2;
 
 use Tie::Scalar;
-use Tie::Array;
-use Tie::Hash;
 
 use Scalar::Util::Instance
     { for => 'Foo', as => 'is_a_Foo' };

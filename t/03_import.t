@@ -1,6 +1,7 @@
 #!perl -w
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 9;
+use Test::Exception;
 
 use Scalar::Util::Instance
     { for => 'Foo', as => 'is_a_Foo' },
@@ -26,3 +27,14 @@ ok!A::is_a_Bar(Foo->new);
 ok A::is_a_Bar(Bar->new);
 ok!A::is_a_Bar(Baz->new);
 
+lives_ok{
+    Scalar::Util::Instance->import();
+};
+
+throws_ok{
+    Scalar::Util::Instance->import({for => 'Foo'});
+} qr/You must define a predicate name/;
+
+throws_ok{
+    Scalar::Util::Instance->import({as => 'is_a_Foo'});
+} qr/You must define a class name/;

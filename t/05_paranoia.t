@@ -3,7 +3,7 @@
 use strict;
 use Test::More tests => 25;
 
-use Scalar::Util;
+#use Scalar::Util;
 use Scalar::Util::Instance;
 
 sub is_instance{

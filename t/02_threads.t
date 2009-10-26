@@ -9,7 +9,7 @@ BEGIN{
 use Test::Exception;
 plan tests => 26 * 2;
 
-use Scalar::Util::Instance;
+use Scalar::Util::Instance ();
 
 *is_a_foo       = Scalar::Util::Instance->generate_for('Foo');
 *is_a_bar       = Scalar::Util::Instance->generate_for('Bar');
