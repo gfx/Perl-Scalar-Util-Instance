@@ -41,7 +41,7 @@ canonicalize_package_name(const char* name){
 }
 
 static int
-lookup_isa(pTHX_ const char* const klass_pv, HV* const instance_stash){
+lookup_isa(pTHX_ HV* const instance_stash, const char* const klass_pv){
     AV*  const linearized_isa = mro_get_linear_isa(instance_stash);
     SV**       svp            = AvARRAY(linearized_isa);
     SV** const end            = svp + AvFILLp(linearized_isa) + 1;
@@ -57,7 +57,7 @@ lookup_isa(pTHX_ const char* const klass_pv, HV* const instance_stash){
 }
 
 static int
-instance_isa(pTHX_ const MAGIC* const mg, SV* const instance){
+instance_isa(pTHX_ SV* const instance, const MAGIC* const mg){
     dMY_CXT;
     HV* const instance_stash = SvSTASH(SvRV(instance));
     GV* const instance_isa   = gv_fetchmeth_autoload(instance_stash, "isa", sizeof("isa")-1, 0);
@@ -65,7 +65,7 @@ instance_isa(pTHX_ const MAGIC* const mg, SV* const instance){
     /* the instance has no own isa method */
     if(instance_isa == NULL || GvCV(instance_isa) == GvCV(MY_CXT.universal_isa)){
         return MG_klass_stash(mg) == instance_stash
-            || lookup_isa(aTHX_ MG_klass_pv(mg), instance_stash);
+            || lookup_isa(aTHX_ instance_stash, MG_klass_pv(mg));
     }
     /* the instance has its own isa method */
     else {
@@ -116,7 +116,7 @@ XS(XS_isa_check){
     sv = ST(0);
     SvGETMAGIC(sv);
 
-    ST(0) = boolSV( SvROK(sv) && SvOBJECT(SvRV(sv)) && instance_isa(aTHX_ (MAGIC*)XSANY.any_ptr, sv) );
+    ST(0) = boolSV( SvROK(sv) && SvOBJECT(SvRV(sv)) && instance_isa(aTHX_ sv, (MAGIC*)XSANY.any_ptr) );
     XSRETURN(1);
 }
 
