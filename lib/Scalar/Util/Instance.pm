@@ -65,17 +65,17 @@ C<< blessed($obj) && $obj->isa(...) >>, but is significantly faster than it.
 
 =head3 C<< Scalar::Util::Instance->generate_for(ClassName, ?PredicateName) >>
 
-Generates an is-a predicate.
+Generates an is-a predicate function for I<ClassName>.
 
-An is-a predicate for I<ClassName> is a function which is the same as the following:
+If I<PredicateName> is specified, the method installs the generated function
+as that name. Otherwise returns an anonymous CODE reference.
+
+An is-a predicate is a function which is the same as the following:
 
     sub is_a_some_class {
         my($obj) = @_;
         return Scalar::Util::blessed($obj) && $obj->isa($ClassName);
     }
-
-If I<PredicateName> is specified, the method will install the generated function
-as that name. Otherwise returns an anonymous CODE reference.
 
 =head1 DEPENDENCIES
 
