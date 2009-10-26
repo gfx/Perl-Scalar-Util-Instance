@@ -17,7 +17,7 @@ sub import {
         my $as = $config->{as};
         if(!defined $as){
             require Carp;
-            Carp::croak("You must define an predicate name by 'as'");
+            Carp::croak("You must define a predicate name by 'as'");
         }
         if($as !~ /::/){
             $as = $into . '::' . $as;
