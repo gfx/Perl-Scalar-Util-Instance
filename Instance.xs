@@ -24,7 +24,6 @@ static MGVTBL scalar_util_instance_vtbl;
 
 static const char*
 canonicalize_package_name(const char* name){
-    assert(name);
 
     /* "::Foo" -> "Foo" */
     if(name[0] == ':' && name[1] == ':'){
