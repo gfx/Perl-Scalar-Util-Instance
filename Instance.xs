@@ -37,7 +37,7 @@ canonicalize_package_name(const char* name){
 }
 
 static int
-check_isa(pTHX_ MAGIC* const mg, SV* const instance){
+instance_isa(pTHX_ const MAGIC* const mg, SV* const instance){
     dMY_CXT;
     HV* const instance_stash = SvSTASH(SvRV(instance));
     GV* const instance_isa   = gv_fetchmeth_autoload(instance_stash, "isa", sizeof("isa")-1, 0);
@@ -97,8 +97,8 @@ check_isa(pTHX_ MAGIC* const mg, SV* const instance){
     }
 }
 
-XS(XS_isa_checker); /* -W */
-XS(XS_isa_checker){
+XS(XS_isa_check); /* -W */
+XS(XS_isa_check){
     dVAR;
     dXSARGS;
     SV* sv;
@@ -117,12 +117,12 @@ XS(XS_isa_checker){
     sv = ST(0);
     SvGETMAGIC(sv);
 
-    ST(0) = boolSV( SvROK(sv) && SvOBJECT(SvRV(sv)) && check_isa(aTHX_ (MAGIC*)XSANY.any_ptr, sv) );
+    ST(0) = boolSV( SvROK(sv) && SvOBJECT(SvRV(sv)) && instance_isa(aTHX_ (MAGIC*)XSANY.any_ptr, sv) );
     XSRETURN(1);
 }
 
-XS(XS_isa_checker_for_universal); /* -W */
-XS(XS_isa_checker_for_universal){
+XS(XS_isa_check_for_universal); /* -W */
+XS(XS_isa_check_for_universal){
     dVAR;
     dXSARGS;
     SV* sv;
@@ -183,12 +183,12 @@ PPCODE:
     CV* xsub;
 
     if(!SvOK(klass)){
-        croak("You must define a class name for generate_isa_checker");
+        croak("You must define a class name for generate_for");
     }
     klass_pv = canonicalize_package_name( SvPV_const(klass, klass_len) );
 
     if(strNE(klass_pv, "UNIVERSAL")){
-        xsub = newXS(predicate_name, XS_isa_checker, __FILE__);
+        xsub = newXS(predicate_name, XS_isa_check, __FILE__);
 
         stash = gv_stashpvn(klass_pv, klass_len, GV_ADD);
 
@@ -202,7 +202,7 @@ PPCODE:
         );
     }
     else{
-        xsub = newXS(predicate_name, XS_isa_checker_for_universal, __FILE__);
+        xsub = newXS(predicate_name, XS_isa_check_for_universal, __FILE__);
     }
 
     if(predicate_name == NULL){ /* anonymous predicate */
