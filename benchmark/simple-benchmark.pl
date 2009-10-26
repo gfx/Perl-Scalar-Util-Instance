@@ -17,6 +17,8 @@ signature
 
 sub noop { }
 
+BEGIN{ eval{ require MRO::Compat } }
+
 BEGIN{
     package Base;
     sub new{
@@ -31,6 +33,7 @@ BEGIN{
     package Baz;
     our @ISA = qw(Foo);
     package Diamond;
+    use mro 'c3';
     our @ISA = qw(Bar Baz);
 
     package NonFoo;
@@ -40,22 +43,22 @@ BEGIN{
 foreach my $x (Foo->new, Diamond->new, NonFoo->new, undef){
     print 'For ', defined($x) ? $x : 'undef', "\n";
 
-    my $i = 0;
+    my $n = 100;
 
     cmpthese -1 => {
         'blessed' => sub{
-            for(1 .. 10){
-                $i++ if blessed($x) && $x->isa('Foo');
+            for(1 .. $n){
+                1 if blessed($x) && $x->isa('Foo');
             }
         },
         'is_a_Foo' => sub{
-            for(1 .. 10){
-                $i++ if is_a_Foo($x);
+            for(1 .. $n){
+                1 if is_a_Foo($x);
             }
         },
         'noop' => sub{
-            for(1 .. 10){
-                $i++ if noop($x);
+            for(1 .. $n){
+                1 if noop($x);
             }
         },
     };
