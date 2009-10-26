@@ -55,7 +55,7 @@ This document describes Scalar::Util::Instance version 0.001.
 
 =head1 DESCRIPTION
 
-Scalar::Util::Instance provides is-a predictes to look up
+Scalar::Util::Instance provides is-a predicates to look up
 an is-a hierarchy for specific classes. This is an alternative to
 C<< blessed($obj) && $obj->isa(...) >>, but is significantly faster than it.
 
