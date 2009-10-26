@@ -146,7 +146,7 @@ XS(XS_isa_check_for_universal){
 
 static void
 setup_my_cxt(pTHX_ pMY_CXT){
-    MY_CXT.universal_isa = CvGV(get_cv("UNIVERSAL::isa", GV_ADD));
+    MY_CXT.universal_isa = gv_fetchpvs("UNIVERSAL::isa", GV_ADD, SVt_PVCV);
     SvREFCNT_inc_simple_void_NN(MY_CXT.universal_isa);
 }
 
