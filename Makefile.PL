@@ -9,7 +9,8 @@ cc_warnings;
 
 requires 'MRO::Compat' if $] < 5.010;
 
-test_requires 'Test::More' => 0.80;
+test_requires 'Test::More'       => 0.80;
+test_requires 'Test::Exception', => 0.27;
 
 tests 't/*.t';
 author_tests 'xt';
