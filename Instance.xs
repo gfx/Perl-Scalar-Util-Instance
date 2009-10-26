@@ -8,7 +8,6 @@
 #define NEED_mro_get_linear_isa
 #include "mro_compat.h"
 
-#define INLINE_STR_EQ
 #include "streq.h"
 
 #define MY_CXT_KEY "Scalar::Util::Instance::_guts" XS_VERSION
