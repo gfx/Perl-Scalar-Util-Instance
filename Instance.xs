@@ -17,6 +17,10 @@ typedef struct sui_cxt{
 } my_cxt_t;
 START_MY_CXT
 
+#define MG_klass_stash(mg) ((HV*)(mg)->mg_obj)
+#define MG_klass_pv(mg)    ((mg)->mg_ptr)
+#define MG_klass_len(mg)   ((mg)->mg_len)
+
 static MGVTBL scalar_util_instance_vtbl;
 
 static const char*
@@ -37,6 +41,22 @@ canonicalize_package_name(const char* name){
 }
 
 static int
+lookup_isa(pTHX_ const char* const klass_pv, HV* const instance_stash){
+    AV*  const linearized_isa = mro_get_linear_isa(instance_stash);
+    SV**       svp            = AvARRAY(linearized_isa);
+    SV** const end            = svp + AvFILLp(linearized_isa) + 1;
+
+    while(svp != end){
+        assert(SvPVX(*svp));
+        if(strEQ(klass_pv, canonicalize_package_name(SvPVX(*svp)))){
+            return TRUE;
+        }
+        svp++;
+    }
+    return FALSE;
+}
+
+static int
 instance_isa(pTHX_ const MAGIC* const mg, SV* const instance){
     dMY_CXT;
     HV* const instance_stash = SvSTASH(SvRV(instance));
@@ -44,31 +64,11 @@ instance_isa(pTHX_ const MAGIC* const mg, SV* const instance){
 
     /* the instance has no own isa method */
     if(instance_isa == NULL || GvCV(instance_isa) == GvCV(MY_CXT.universal_isa)){
-        HV* const klass_stash = (HV*)mg->mg_obj;
-
-        if(klass_stash == instance_stash){
-            return TRUE;
-        }
-        else{ /* look up @ISA hierarchy */
-            const char* const klass_pv = mg->mg_ptr;
-            AV*  const linearized_isa  = mro_get_linear_isa(instance_stash);
-            SV**       svp             = AvARRAY(linearized_isa);
-            SV** const end             = svp + AvFILLp(linearized_isa) + 1;
-
-            while(svp != end){
-                assert(SvPVX(*svp));
-                if(strEQ(klass_pv, canonicalize_package_name(SvPVX(*svp)))){
-                    return TRUE;
-                }
-                svp++;
-            }
-        }
-        return FALSE;
+        return MG_klass_stash(mg) == instance_stash
+            || lookup_isa(aTHX_ MG_klass_pv(mg), instance_stash);
     }
     /* the instance has its own isa method */
     else {
-        const char* const klass_pv  = mg->mg_ptr;
-        STRLEN const      klass_len = mg->mg_len;
         int retval;
         dSP;
 
@@ -78,15 +78,14 @@ instance_isa(pTHX_ const MAGIC* const mg, SV* const instance){
         PUSHMARK(SP);
         EXTEND(SP, 2);
         PUSHs(instance);
-        mPUSHp(klass_pv, klass_len);
+        mPUSHp(MG_klass_pv(mg), MG_klass_len(mg));
         PUTBACK;
 
         call_sv((SV*)instance_isa, G_SCALAR);
 
         SPAGAIN;
 
-        retval = SvTRUE(TOPs);
-        (void)POPs;
+        retval = SvTRUEx(POPs);
 
         PUTBACK;
 
