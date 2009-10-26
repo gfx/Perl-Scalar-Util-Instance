@@ -185,7 +185,8 @@ PPCODE:
     if(!SvOK(klass)){
         croak("You must define a class name for generate_for");
     }
-    klass_pv = canonicalize_package_name( SvPV_const(klass, klass_len) );
+    klass_pv = SvPV_const(klass, klass_len);
+    klass_pv = canonicalize_package_name(klass_pv);
 
     if(strNE(klass_pv, "UNIVERSAL")){
         xsub = newXS(predicate_name, XS_isa_check, __FILE__);
